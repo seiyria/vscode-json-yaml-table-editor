@@ -10,6 +10,9 @@
   "categories": [
     "Other"
   ],
+  "repository": {
+    "url": "https://github.com/seiyria/vscode-json-yaml-table-editor"
+  },
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
@@ -18,9 +21,15 @@
         "viewType": "tableEditor.tableView",
         "displayName": "YAML/JSON Table Editor",
         "selector": [
-          { "filenamePattern": "*.json" },
-          { "filenamePattern": "*.yaml" },
-          { "filenamePattern": "*.yml" }
+          {
+            "filenamePattern": "*.json"
+          },
+          {
+            "filenamePattern": "*.yaml"
+          },
+          {
+            "filenamePattern": "*.yml"
+          }
         ],
         "priority": "option"
       }
@@ -50,7 +59,10 @@
                 "description": "Absolute path, workspace-relative path, or URL to schema"
               }
             },
-            "required": ["fileMatch", "schemaPath"]
+            "required": [
+              "fileMatch",
+              "schemaPath"
+            ]
           }
         }
       }
