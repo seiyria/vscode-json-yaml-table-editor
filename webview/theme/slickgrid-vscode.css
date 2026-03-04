@@ -1,0 +1,317 @@
+/* VS Code theme integration for SlickGrid */
+
+/* ─── Toolbar ─── */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: var(--vscode-editor-background);
+  border-bottom: 1px solid var(--vscode-panel-border, #333);
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.toolbar-buttons {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--vscode-button-secondaryBackground, #3a3d41);
+  color: var(--vscode-button-secondaryForeground, #cccccc);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--vscode-font-family);
+  white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+  background: var(--vscode-button-secondaryHoverBackground, #45494e);
+}
+
+.toolbar-btn:active {
+  background: var(--vscode-button-background, #0e639c);
+  color: var(--vscode-button-foreground, #ffffff);
+}
+
+.row-count {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground, #969696);
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+/* ─── Search Bar ─── */
+.search-bar {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--vscode-editor-background);
+  border-bottom: 1px solid var(--vscode-panel-border, #333);
+  gap: 4px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 3px 8px;
+  background: var(--vscode-input-background, #3c3c3c);
+  color: var(--vscode-input-foreground, #cccccc);
+  border: 1px solid var(--vscode-input-border, #555);
+  border-radius: 2px;
+  font-family: var(--vscode-font-family);
+  font-size: 13px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--vscode-focusBorder, #007fd4);
+}
+
+.search-close {
+  padding: 3px 8px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ─── Grid Container ─── */
+#grid-container {
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── SlickGrid Overrides ─── */
+.slick-header {
+  background: var(--vscode-editor-background) !important;
+  border-bottom: 1px solid var(--vscode-panel-border, #333) !important;
+}
+
+.slick-header-column {
+  background: var(--vscode-editor-background) !important;
+  color: var(--vscode-foreground) !important;
+  border-right: 1px solid var(--vscode-panel-border, #333) !important;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 4px 8px !important;
+}
+
+.slick-header-column:hover {
+  background: var(--vscode-list-hoverBackground, #2a2d2e) !important;
+}
+
+.slick-header-column.slick-header-column-sorted {
+  background: var(--vscode-list-activeSelectionBackground, #094771) !important;
+  color: var(--vscode-list-activeSelectionForeground, #ffffff) !important;
+}
+
+.slick-row {
+  background: var(--vscode-editor-background) !important;
+  color: var(--vscode-editor-foreground) !important;
+}
+
+.slick-row:hover {
+  background: var(--vscode-list-hoverBackground, #2a2d2e) !important;
+}
+
+.slick-row.odd {
+  background: var(--vscode-editor-background) !important;
+}
+
+.slick-row.selected {
+  background: var(--vscode-list-activeSelectionBackground, #094771) !important;
+  color: var(--vscode-list-activeSelectionForeground, #ffffff) !important;
+}
+
+.slick-cell {
+  border-right: 1px solid var(--vscode-panel-border, #2a2a2a) !important;
+  border-bottom: 1px solid var(--vscode-panel-border, #2a2a2a) !important;
+  padding: 4px 8px !important;
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.slick-cell.active {
+  border-color: var(--vscode-focusBorder, #007fd4) !important;
+}
+
+.slick-cell.selected {
+  background: var(--vscode-editor-selectionBackground, rgba(38, 79, 120, 0.5)) !important;
+}
+
+.slick-cell.editable {
+  background: var(--vscode-input-background, #3c3c3c) !important;
+}
+
+/* Row number column */
+.row-number-cell {
+  text-align: center;
+  color: var(--vscode-editorLineNumber-foreground, #858585) !important;
+  cursor: pointer;
+}
+
+.row-number-header {
+  text-align: center;
+}
+
+/* Validation error (old class) */
+.cell-invalid {
+  border: 1px solid var(--vscode-inputValidation-errorBorder, #be1100) !important;
+  position: relative;
+}
+
+.cell-invalid::after {
+  content: "!";
+  position: absolute;
+  top: 0;
+  right: 2px;
+  color: var(--vscode-inputValidation-errorBorder, #be1100);
+  font-weight: bold;
+  font-size: 10px;
+}
+
+/* Schema validation error highlight */
+.cell-validation-error {
+  background: rgba(190, 17, 0, 0.15) !important;
+  border: 1px solid var(--vscode-inputValidation-errorBorder, #be1100) !important;
+  position: relative;
+}
+
+.cell-validation-error::after {
+  content: "\26A0";
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  color: var(--vscode-inputValidation-errorBorder, #be1100);
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* Validation count in toolbar */
+.validation-count {
+  font-weight: 600;
+}
+
+/* SlickGrid viewport */
+.slick-viewport {
+  background: var(--vscode-editor-background) !important;
+}
+
+/* SlickGrid container/pane backgrounds */
+.slick-container,
+.slick-pane,
+.grid-canvas {
+  background: var(--vscode-editor-background) !important;
+}
+
+
+/* Scrollbar */
+.slick-viewport::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.slick-viewport::-webkit-scrollbar-track {
+  background: var(--vscode-scrollbarSlider-background, rgba(121, 121, 121, 0.1));
+}
+
+.slick-viewport::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background, rgba(121, 121, 121, 0.4));
+  border-radius: 5px;
+}
+
+.slick-viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground, rgba(121, 121, 121, 0.7));
+}
+
+/* Sort indicator */
+.slick-sort-indicator {
+  display: inline-block;
+  margin-left: 4px;
+}
+
+.slick-sort-indicator-asc::after {
+  content: "▲";
+  font-size: 8px;
+}
+
+.slick-sort-indicator-desc::after {
+  content: "▼";
+  font-size: 8px;
+}
+
+/* Context menu */
+.context-menu {
+  font-family: var(--vscode-font-family);
+  font-size: 13px;
+}
+
+.context-menu-item {
+  user-select: none;
+}
+
+/* ─── Breadcrumb Bar ─── */
+.breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--vscode-editor-background);
+  border-bottom: 1px solid var(--vscode-panel-border, #333);
+  gap: 0;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.breadcrumb-link {
+  color: var(--vscode-textLink-foreground, #3794ff);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-current {
+  font-weight: 600;
+  color: var(--vscode-foreground);
+}
+
+.breadcrumb-separator {
+  color: var(--vscode-descriptionForeground, #969696);
+  margin: 0 2px;
+}
+
+/* ─── Drilldown Cells ─── */
+.cell-drilldown {
+  cursor: pointer !important;
+}
+
+.drilldown-cell {
+  color: var(--vscode-textLink-foreground, #3794ff);
+  cursor: pointer;
+}
+
+.cell-drilldown:hover .drilldown-cell {
+  text-decoration: underline;
+}
+
+/* ─── High Contrast ─── */
+.vscode-high-contrast .slick-cell {
+  border-color: var(--vscode-contrastBorder, #6fc3df) !important;
+}
+
+.vscode-high-contrast .slick-header-column {
+  border-color: var(--vscode-contrastBorder, #6fc3df) !important;
+}
+
+.vscode-high-contrast .toolbar-btn {
+  border: 1px solid var(--vscode-contrastBorder, #6fc3df);
+}

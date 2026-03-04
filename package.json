@@ -1,0 +1,80 @@
+{
+  "name": "vscode-table-editor",
+  "displayName": "YAML/JSON Table Editor",
+  "description": "Edit JSON and YAML array files as interactive spreadsheet-style tables",
+  "version": "0.1.0",
+  "publisher": "seiyria",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "tableEditor.tableView",
+        "displayName": "YAML/JSON Table Editor",
+        "selector": [
+          { "filenamePattern": "*.json" },
+          { "filenamePattern": "*.yaml" },
+          { "filenamePattern": "*.yml" }
+        ],
+        "priority": "option"
+      }
+    ],
+    "commands": [
+      {
+        "command": "tableEditor.generateUuid",
+        "title": "YAML/JSON Table Editor: Generate UUID"
+      }
+    ],
+    "configuration": {
+      "title": "YAML/JSON Table Editor",
+      "properties": {
+        "tableEditor.schemas": {
+          "type": "array",
+          "default": [],
+          "description": "Array of { fileMatch, schemaPath } objects for JSON Schema association",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fileMatch": {
+                "type": "string",
+                "description": "Glob pattern to match files"
+              },
+              "schemaPath": {
+                "type": "string",
+                "description": "Absolute path, workspace-relative path, or URL to schema"
+              }
+            },
+            "required": ["fileMatch", "schemaPath"]
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "test": "vitest run",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  },
+  "dependencies": {
+    "@slickgrid-universal/common": "^5.0.0",
+    "@slickgrid-universal/vanilla-bundle": "^5.0.0",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^3.0.0",
+    "minimatch": "^9.0.0",
+    "yaml": "^2.4.0"
+  }
+}
