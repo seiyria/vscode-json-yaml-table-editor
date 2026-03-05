@@ -3,6 +3,7 @@ export interface ContextMenuCallbacks {
   onGenerateUuid: (row: number, cell: number) => void;
   onSetNull: (row: number, cell: number) => void;
   onCopyValue: (row: number, cell: number) => void;
+  onEditValue: (row: number, cell: number) => void;
   onDrilldown?: (row: number, cell: number) => void;
   onAddRow: (afterIndex: number) => void;
   onDeleteRows: (rowIndices: number[]) => void;
@@ -101,6 +102,7 @@ export function createContextMenu(
           addItem("Move Down", () => callbacks.onMoveRows(rowIndices, "down"));
         }
       } else if (cellInfo && cellInfo.cell > 0) {
+        addItem("Edit value", () => callbacks.onEditValue(cellInfo.row, cellInfo.cell));
         addItem("Copy value", () => callbacks.onCopyValue(cellInfo.row, cellInfo.cell));
         addItem("Set to null", () => callbacks.onSetNull(cellInfo.row, cellInfo.cell));
         addItem("Generate UUID", () => callbacks.onGenerateUuid(cellInfo.row, cellInfo.cell));

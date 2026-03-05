@@ -2,7 +2,7 @@
   "name": "vscode-table-editor",
   "displayName": "YAML/JSON Table Editor",
   "description": "Edit JSON and YAML array files as interactive spreadsheet-style tables",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "seiyria",
   "engines": {
     "vscode": "^1.85.0"

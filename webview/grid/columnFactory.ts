@@ -94,15 +94,18 @@ export function buildColumns(columnInfos: ColumnInfo[]): Column[] {
     switch (info.type) {
       case "number":
         col.editor = { model: NumberEditor };
+        col.editorClass = NumberEditor as any;
         break;
       case "boolean":
         col.editor = { model: BooleanEditor };
+        col.editorClass = BooleanEditor as any;
         col.formatter = booleanFormatter;
         break;
       case "array":
         col.editor = info.enumValues
           ? { model: ArrayEditor, params: { enumValues: info.enumValues } }
           : { model: ArrayEditor };
+        col.editorClass = ArrayEditor as any;
         col.formatter = arrayFormatter;
         if (info.enumValues) {
           (col as any).__enumValues = info.enumValues;
@@ -116,10 +119,12 @@ export function buildColumns(columnInfos: ColumnInfo[]): Column[] {
       default:
         if (info.enumValues && info.enumValues.length > 0) {
           col.editor = { model: EnumEditor, params: { enumValues: info.enumValues } };
+          col.editorClass = EnumEditor as any;
           (col as any).__enumValues = info.enumValues;
         } else {
           // Default text editor
           col.editor = { model: TextEditor };
+          col.editorClass = TextEditor as any;
         }
         break;
     }

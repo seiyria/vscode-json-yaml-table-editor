@@ -238,6 +238,23 @@ function initGrid(data: TableData) {
           if (!col) return;
           postMessage(withDrilldown({ type: "editCell" as const, rowIndex: row, columnPath: col.path, value: null }));
         },
+        onEditValue: (row: number, cell: number) => {
+          if (!currentData) return;
+          const col = currentData.columns[cell - 1];
+          if (!col) return;
+          const currentVal = currentData.rows[row]?.[col.path];
+          const text = currentVal === null || currentVal === undefined ? "" : String(currentVal);
+          showEditDialog(text, (newValue) => {
+            let value: unknown = newValue;
+            if (col.type === "number" && newValue !== null) {
+              const num = Number(newValue);
+              if (!isNaN(num)) value = num;
+            } else if (col.type === "boolean" && newValue !== null) {
+              value = newValue === "true";
+            }
+            postMessage(withDrilldown({ type: "editCell" as const, rowIndex: row, columnPath: col.path, value }));
+          });
+        },
         onCopyValue: (row: number, cell: number) => {
           if (!currentData) return;
           const col = currentData.columns[cell - 1];
@@ -423,6 +440,109 @@ function initGrid(data: TableData) {
           e.preventDefault();
         }
       }
+    }
+  });
+}
+
+function showEditDialog(currentValue: string, onSave: (value: string | null) => void) {
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.inset = "0";
+  overlay.style.zIndex = "10002";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.background = "rgba(0,0,0,0.4)";
+
+  const dialog = document.createElement("div");
+  dialog.style.background = "var(--vscode-editor-background, #1e1e1e)";
+  dialog.style.border = "1px solid var(--vscode-menu-border, #454545)";
+  dialog.style.borderRadius = "6px";
+  dialog.style.padding = "12px";
+  dialog.style.minWidth = "300px";
+  dialog.style.maxWidth = "500px";
+  dialog.style.boxShadow = "0 4px 16px rgba(0,0,0,0.5)";
+
+  const label = document.createElement("div");
+  label.textContent = "Edit value:";
+  label.style.color = "var(--vscode-foreground, #cccccc)";
+  label.style.marginBottom = "8px";
+  label.style.fontSize = "13px";
+  dialog.appendChild(label);
+
+  const textarea = document.createElement("textarea");
+  textarea.value = currentValue;
+  textarea.style.width = "100%";
+  textarea.style.minHeight = "80px";
+  textarea.style.maxHeight = "300px";
+  textarea.style.resize = "vertical";
+  textarea.style.background = "var(--vscode-input-background, #3c3c3c)";
+  textarea.style.color = "var(--vscode-input-foreground, #cccccc)";
+  textarea.style.border = "1px solid var(--vscode-focusBorder, #007fd4)";
+  textarea.style.borderRadius = "2px";
+  textarea.style.padding = "6px";
+  textarea.style.boxSizing = "border-box";
+  textarea.style.fontFamily = "var(--vscode-font-family)";
+  textarea.style.fontSize = "13px";
+  textarea.style.outline = "none";
+  dialog.appendChild(textarea);
+
+  const buttons = document.createElement("div");
+  buttons.style.display = "flex";
+  buttons.style.justifyContent = "flex-end";
+  buttons.style.gap = "8px";
+  buttons.style.marginTop = "8px";
+
+  const btnStyle = (btn: HTMLButtonElement) => {
+    btn.style.padding = "4px 12px";
+    btn.style.border = "none";
+    btn.style.borderRadius = "2px";
+    btn.style.cursor = "pointer";
+    btn.style.fontSize = "13px";
+    btn.style.fontFamily = "var(--vscode-font-family)";
+  };
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "Cancel";
+  btnStyle(cancelBtn);
+  cancelBtn.style.background = "var(--vscode-button-secondaryBackground, #3a3d41)";
+  cancelBtn.style.color = "var(--vscode-button-secondaryForeground, #cccccc)";
+  buttons.appendChild(cancelBtn);
+
+  const saveBtn = document.createElement("button");
+  saveBtn.textContent = "Save";
+  btnStyle(saveBtn);
+  saveBtn.style.background = "var(--vscode-button-background, #0e639c)";
+  saveBtn.style.color = "var(--vscode-button-foreground, #ffffff)";
+  buttons.appendChild(saveBtn);
+
+  dialog.appendChild(buttons);
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+  textarea.focus();
+  textarea.setSelectionRange(0, textarea.value.length);
+
+  const close = () => overlay.remove();
+
+  cancelBtn.addEventListener("click", close);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+  saveBtn.addEventListener("click", () => {
+    const val = textarea.value;
+    onSave(val === "" ? null : val);
+    close();
+  });
+  textarea.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      close();
+    }
+    if (e.key === "Enter" && e.ctrlKey) {
+      e.preventDefault();
+      const val = textarea.value;
+      onSave(val === "" ? null : val);
+      close();
     }
   });
 }
