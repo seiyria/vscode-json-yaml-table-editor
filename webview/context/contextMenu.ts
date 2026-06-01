@@ -1,5 +1,6 @@
 export interface ContextMenuCallbacks {
   onDeleteColumn: (columnPath: string) => void;
+  onEditColumnName: (columnPath: string) => void;
   onGenerateUuid: (row: number, cell: number) => void;
   onSetNull: (row: number, cell: number) => void;
   onCopyValue: (row: number, cell: number) => void;
@@ -18,7 +19,7 @@ import { columnIdToPath } from "../grid/columnFactory";
 
 export function createContextMenu(
   container: HTMLElement,
-  callbacks: ContextMenuCallbacks
+  callbacks: ContextMenuCallbacks,
 ) {
   let menu: HTMLDivElement | null = null;
 
@@ -61,8 +62,7 @@ export function createContextMenu(
       item.addEventListener("mouseenter", () => {
         item.style.background =
           "var(--vscode-menu-selectionBackground, #094771)";
-        item.style.color =
-          "var(--vscode-menu-selectionForeground, #ffffff)";
+        item.style.color = "var(--vscode-menu-selectionForeground, #ffffff)";
       });
       item.addEventListener("mouseleave", () => {
         item.style.background = "transparent";
@@ -78,6 +78,9 @@ export function createContextMenu(
     if (header) {
       const columnId = header.getAttribute("data-id") || header.dataset.id;
       if (columnId && columnId !== "__rowNum") {
+        addItem("Rename Column", () => {
+          callbacks.onEditColumnName(columnIdToPath(columnId));
+        });
         addItem("Delete Column", () => {
           callbacks.onDeleteColumn(columnIdToPath(columnId));
         });
@@ -90,8 +93,12 @@ export function createContextMenu(
         // Row number cell — row operations
         const selected = callbacks.getSelectedRows();
         const rowIndices = selected.length > 0 ? selected : [cellInfo.row];
-        addItem("Insert Row Above", () => callbacks.onAddRow(Math.min(...rowIndices) - 1));
-        addItem("Insert Row Below", () => callbacks.onAddRow(Math.max(...rowIndices)));
+        addItem("Insert Row Above", () =>
+          callbacks.onAddRow(Math.min(...rowIndices) - 1),
+        );
+        addItem("Insert Row Below", () =>
+          callbacks.onAddRow(Math.max(...rowIndices)),
+        );
         addItem("Duplicate Row", () => callbacks.onDuplicateRows(rowIndices));
         addItem("Delete Row", () => callbacks.onDeleteRows(rowIndices));
         const totalRows = callbacks.getTotalRowCount();
@@ -102,14 +109,24 @@ export function createContextMenu(
           addItem("Move Down", () => callbacks.onMoveRows(rowIndices, "down"));
         }
       } else if (cellInfo && cellInfo.cell > 0) {
-        addItem("Edit value", () => callbacks.onEditValue(cellInfo.row, cellInfo.cell));
-        addItem("Copy value", () => callbacks.onCopyValue(cellInfo.row, cellInfo.cell));
-        addItem("Set to null", () => callbacks.onSetNull(cellInfo.row, cellInfo.cell));
-        addItem("Generate UUID", () => callbacks.onGenerateUuid(cellInfo.row, cellInfo.cell));
+        addItem("Edit value", () =>
+          callbacks.onEditValue(cellInfo.row, cellInfo.cell),
+        );
+        addItem("Copy value", () =>
+          callbacks.onCopyValue(cellInfo.row, cellInfo.cell),
+        );
+        addItem("Set to null", () =>
+          callbacks.onSetNull(cellInfo.row, cellInfo.cell),
+        );
+        addItem("Generate UUID", () =>
+          callbacks.onGenerateUuid(cellInfo.row, cellInfo.cell),
+        );
 
         // Show drill-down option for arrayOfObjects cells
         if (callbacks.onDrilldown && cellEl.querySelector(".drilldown-cell")) {
-          addItem("Drill into array", () => callbacks.onDrilldown!(cellInfo.row, cellInfo.cell));
+          addItem("Drill into array", () =>
+            callbacks.onDrilldown!(cellInfo.row, cellInfo.cell),
+          );
         }
       }
     }

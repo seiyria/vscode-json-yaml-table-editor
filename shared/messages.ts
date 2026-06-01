@@ -1,4 +1,9 @@
-import type { TableData, FlatRow, ColumnInfo, DrilldownPath } from "./tableTypes";
+import type {
+  TableData,
+  FlatRow,
+  ColumnInfo,
+  DrilldownPath,
+} from "./tableTypes";
 
 // ─── Messages from extension host → webview ───
 
@@ -86,6 +91,12 @@ export interface DeleteColumnMessage {
   drilldownPath?: DrilldownPath;
 }
 
+export interface EditColumnNameMessage {
+  type: "editColumnName";
+  columnPath: string;
+  drilldownPath?: DrilldownPath;
+}
+
 export interface GenerateUuidMessage {
   type: "generateUuid";
   cells: Array<{ rowIndex: number; columnPath: string }>;
@@ -127,6 +138,7 @@ export type WebviewToExtensionMessage =
   | MoveRowsMessage
   | AddColumnMessage
   | DeleteColumnMessage
+  | EditColumnNameMessage
   | GenerateUuidMessage
   | RequestPromptMessage
   | SaveColumnLayoutMessage

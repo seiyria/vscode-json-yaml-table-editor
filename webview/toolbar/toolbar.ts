@@ -13,21 +13,57 @@ export interface ToolbarCallbacks {
 export function createToolbar(
   container: HTMLElement,
   callbacks: ToolbarCallbacks,
-  initialRowCount: number
+  initialRowCount: number,
 ) {
   container.innerHTML = "";
   container.className = "table-toolbar";
 
   const buttons: Array<{ label: string; icon: string; onClick: () => void }> = [
-    { label: "Add Row", icon: "codicon-add", onClick: callbacks.onAddRow },
-    { label: "Delete Row", icon: "codicon-trash", onClick: callbacks.onDeleteRows },
-    { label: "Duplicate Row", icon: "codicon-copy", onClick: callbacks.onDuplicateRows },
-    { label: "Move Up", icon: "codicon-arrow-up", onClick: callbacks.onMoveUp },
-    { label: "Move Down", icon: "codicon-arrow-down", onClick: callbacks.onMoveDown },
-    { label: "Add Column", icon: "codicon-split-horizontal", onClick: callbacks.onAddColumn },
-    { label: "Generate UUID", icon: "codicon-key", onClick: callbacks.onGenerateUuids },
-    { label: "Search", icon: "codicon-search", onClick: callbacks.onSearch },
-    { label: "Validate", icon: "codicon-check-all", onClick: callbacks.onValidate },
+    {
+      label: "Add Row",
+      icon: "codicon-add",
+      onClick: callbacks.onAddRow,
+    },
+    {
+      label: "Delete Row",
+      icon: "codicon-trash",
+      onClick: callbacks.onDeleteRows,
+    },
+    {
+      label: "Duplicate Row",
+      icon: "codicon-copy",
+      onClick: callbacks.onDuplicateRows,
+    },
+    {
+      label: "Move Up",
+      icon: "codicon-arrow-up",
+      onClick: callbacks.onMoveUp,
+    },
+    {
+      label: "Move Down",
+      icon: "codicon-arrow-down",
+      onClick: callbacks.onMoveDown,
+    },
+    {
+      label: "Add Column",
+      icon: "codicon-split-horizontal",
+      onClick: callbacks.onAddColumn,
+    },
+    {
+      label: "Generate UUID",
+      icon: "codicon-key",
+      onClick: callbacks.onGenerateUuids,
+    },
+    {
+      label: "Search",
+      icon: "codicon-search",
+      onClick: callbacks.onSearch,
+    },
+    {
+      label: "Validate",
+      icon: "codicon-check-all",
+      onClick: callbacks.onValidate,
+    },
   ];
 
   const btnGroup = document.createElement("div");

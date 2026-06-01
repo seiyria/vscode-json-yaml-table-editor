@@ -129,7 +129,10 @@ export class TableEditorProvider implements vscode.CustomTextEditorProvider {
           merged.set(col.path, col);
         } else if (col.enumValues && !existing.enumValues) {
           // Data found enum values that schema didn't — keep schema type but add enums
-          merged.set(col.path, { ...existing, enumValues: col.enumValues });
+          merged.set(col.path, {
+            ...existing,
+            enumValues: col.enumValues,
+          });
         }
       }
       return Array.from(merged.values());
@@ -450,6 +453,77 @@ export class TableEditorProvider implements vscode.CustomTextEditorProvider {
             break;
           }
 
+          case "editColumnName": {
+            const oldPath = msg.columnPath;
+            const newPathInput = await vscode.window.showInputBox({
+              title: "Rename Column",
+              prompt:
+                "Enter the new column name (use dots for nested paths, e.g. address.city)",
+              value: oldPath,
+              validateInput: (value) => {
+                const trimmed = value.trim();
+                if (!trimmed) return "Column name cannot be empty.";
+                if (trimmed === oldPath)
+                  return "New column name must be different.";
+                return undefined;
+              },
+            });
+
+            if (!newPathInput) {
+              break;
+            }
+
+            const newPath = newPathInput.trim();
+            const text = document.getText();
+            const fileType = getFileType();
+            const rootResult = parseDocument(text, fileType);
+            if ("error" in rootResult) break;
+
+            const path = msg.drilldownPath ?? [];
+            const scopedColumns =
+              path.length === 0
+                ? rootResult.columns
+                : (() => {
+                    const subResult = extractSubArray(rootResult.rows, path);
+                    if ("error" in subResult) {
+                      return null;
+                    }
+                    return subResult.columns;
+                  })();
+
+            if (!scopedColumns) {
+              break;
+            }
+
+            if (scopedColumns.some((c) => c.path === newPath)) {
+              vscode.window.showErrorMessage(
+                `Cannot rename column \"${oldPath}\" to \"${newPath}\" because the target column already exists.`,
+              );
+              break;
+            }
+
+            await handleScopedEdit(path, (rows, columns) => {
+              for (const row of rows) {
+                if (Object.prototype.hasOwnProperty.call(row, oldPath)) {
+                  row[newPath] = row[oldPath];
+                  delete row[oldPath];
+                }
+              }
+
+              const renamedColumns = columns.map((c) => {
+                if (c.path !== oldPath) return c;
+                return {
+                  ...c,
+                  path: newPath,
+                  label: c.label === oldPath ? newPath : c.label,
+                };
+              });
+
+              return { rows, columns: renamedColumns };
+            });
+            break;
+          }
+
           case "generateUuid": {
             await handleScopedEdit(msg.drilldownPath, (rows, columns) => {
               for (const cell of msg.cells) {
@@ -480,7 +554,10 @@ export class TableEditorProvider implements vscode.CustomTextEditorProvider {
                   if (!("error" in subResult)) {
                     const errors = validateRows(subResult.rows, subSchema);
                     updateStatusBar(errors.length);
-                    postMessage({ type: "validationResult", errors });
+                    postMessage({
+                      type: "validationResult",
+                      errors,
+                    });
                     break;
                   }
                 }
@@ -489,7 +566,10 @@ export class TableEditorProvider implements vscode.CustomTextEditorProvider {
               updateStatusBar(errors.length);
               postMessage({ type: "validationResult", errors });
             } else {
-              postMessage({ type: "validationResult", errors: [] });
+              postMessage({
+                type: "validationResult",
+                errors: [],
+              });
             }
             break;
           }

@@ -2,7 +2,12 @@ import type {
   ExtensionToWebviewMessage,
   WebviewToExtensionMessage,
 } from "../shared/messages";
-import type { TableData, FlatRow, ColumnInfo, DrilldownPath } from "../shared/tableTypes";
+import type {
+  TableData,
+  FlatRow,
+  ColumnInfo,
+  DrilldownPath,
+} from "../shared/tableTypes";
 import { GridManager } from "./grid/gridManager";
 import { buildColumns } from "./grid/columnFactory";
 import { createToolbar } from "./toolbar/toolbar";
@@ -58,7 +63,8 @@ function getRowLabel(row: number): string {
 function drilldownPathsEqual(a: DrilldownPath, b: DrilldownPath): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
-    if (a[i].rowIndex !== b[i].rowIndex || a[i].fieldPath !== b[i].fieldPath) return false;
+    if (a[i].rowIndex !== b[i].rowIndex || a[i].fieldPath !== b[i].fieldPath)
+      return false;
   }
   return true;
 }
@@ -86,7 +92,12 @@ window.addEventListener("message", (event) => {
           gridManager.resetView();
         }
         const updatedColumns = buildColumns(msg.data.columns);
-        gridManager.updateData(msg.data.rows, msg.data.columns, msg.data.errors, updatedColumns);
+        gridManager.updateData(
+          msg.data.rows,
+          msg.data.columns,
+          msg.data.errors,
+          updatedColumns,
+        );
       }
       if (toolbar) {
         toolbar.updateRowCount(msg.data.rows.length);
@@ -154,22 +165,44 @@ function initGrid(data: TableData) {
       onDeleteRows: () => {
         const sel = gridManager?.getSelectedRows() ?? [];
         if (sel.length === 0) return;
-        postMessage(withDrilldown({ type: "deleteRows" as const, rowIndices: sel }));
+        postMessage(
+          withDrilldown({
+            type: "deleteRows" as const,
+            rowIndices: sel,
+          }),
+        );
       },
       onDuplicateRows: () => {
         const sel = gridManager?.getSelectedRows() ?? [];
         if (sel.length === 0) return;
-        postMessage(withDrilldown({ type: "duplicateRows" as const, rowIndices: sel }));
+        postMessage(
+          withDrilldown({
+            type: "duplicateRows" as const,
+            rowIndices: sel,
+          }),
+        );
       },
       onMoveUp: () => {
         const sel = gridManager?.getSelectedRows() ?? [];
         if (sel.length === 0) return;
-        postMessage(withDrilldown({ type: "moveRows" as const, rowIndices: sel, direction: "up" as const }));
+        postMessage(
+          withDrilldown({
+            type: "moveRows" as const,
+            rowIndices: sel,
+            direction: "up" as const,
+          }),
+        );
       },
       onMoveDown: () => {
         const sel = gridManager?.getSelectedRows() ?? [];
         if (sel.length === 0) return;
-        postMessage(withDrilldown({ type: "moveRows" as const, rowIndices: sel, direction: "down" as const }));
+        postMessage(
+          withDrilldown({
+            type: "moveRows" as const,
+            rowIndices: sel,
+            direction: "down" as const,
+          }),
+        );
       },
       onAddColumn: () => {
         const requestId = crypto.randomUUID();
@@ -181,10 +214,12 @@ function initGrid(data: TableData) {
         if (!activeCell) return;
         const col = currentData.columns[activeCell.cell - 1]; // -1 for row number column
         if (!col) return;
-        postMessage(withDrilldown({
-          type: "generateUuid" as const,
-          cells: [{ rowIndex: activeCell.row, columnPath: col.path }],
-        }));
+        postMessage(
+          withDrilldown({
+            type: "generateUuid" as const,
+            cells: [{ rowIndex: activeCell.row, columnPath: col.path }],
+          }),
+        );
       },
       onSearch: () => {
         if (searchBar) searchBar.toggle();
@@ -193,7 +228,7 @@ function initGrid(data: TableData) {
         postMessage({ type: "validate" });
       },
     },
-    data.rows.length
+    data.rows.length,
   );
 
   // Build search bar
@@ -201,101 +236,140 @@ function initGrid(data: TableData) {
     document.getElementById("search-bar")!,
     (filter: string) => {
       if (gridManager) gridManager.setFilter(filter);
-    }
+    },
   );
 
   // Build breadcrumbs
-  breadcrumbs = createBreadcrumbs(
-    document.getElementById("breadcrumbs")!,
-    {
-      onNavigate: (level: number) => {
-        postMessage({ type: "drilldownBack", level });
-      },
-    }
-  );
+  breadcrumbs = createBreadcrumbs(document.getElementById("breadcrumbs")!, {
+    onNavigate: (level: number) => {
+      postMessage({ type: "drilldownBack", level });
+    },
+  });
   breadcrumbs.update(data.drilldownPath ?? []);
 
   // Build context menu (after gridManager is created)
   const initContextMenu = () => {
-    createContextMenu(
-      document.getElementById("grid-container")!,
-      {
-        onDeleteColumn: (columnPath: string) => {
-          postMessage(withDrilldown({ type: "deleteColumn" as const, columnPath }));
-        },
-        onGenerateUuid: (row: number, cell: number) => {
-          if (!currentData) return;
-          const col = currentData.columns[cell - 1]; // -1 for row number column
-          if (!col) return;
-          postMessage(withDrilldown({
+    createContextMenu(document.getElementById("grid-container")!, {
+      onEditColumnName: (columnPath: string) => {
+        postMessage(
+          withDrilldown({
+            type: "editColumnName" as const,
+            columnPath,
+          }),
+        );
+      },
+      onDeleteColumn: (columnPath: string) => {
+        postMessage(
+          withDrilldown({ type: "deleteColumn" as const, columnPath }),
+        );
+      },
+      onGenerateUuid: (row: number, cell: number) => {
+        if (!currentData) return;
+        const col = currentData.columns[cell - 1]; // -1 for row number column
+        if (!col) return;
+        postMessage(
+          withDrilldown({
             type: "generateUuid" as const,
             cells: [{ rowIndex: row, columnPath: col.path }],
-          }));
-        },
-        onSetNull: (row: number, cell: number) => {
-          if (!currentData) return;
-          const col = currentData.columns[cell - 1];
-          if (!col) return;
-          postMessage(withDrilldown({ type: "editCell" as const, rowIndex: row, columnPath: col.path, value: null }));
-        },
-        onEditValue: (row: number, cell: number) => {
-          if (!currentData) return;
-          const col = currentData.columns[cell - 1];
-          if (!col) return;
-          const currentVal = currentData.rows[row]?.[col.path];
-          const text = currentVal === null || currentVal === undefined ? "" : String(currentVal);
-          showEditDialog(text, (newValue) => {
-            let value: unknown = newValue;
-            if (col.type === "number" && newValue !== null) {
-              const num = Number(newValue);
-              if (!isNaN(num)) value = num;
-            } else if (col.type === "boolean" && newValue !== null) {
-              value = newValue === "true";
-            }
-            postMessage(withDrilldown({ type: "editCell" as const, rowIndex: row, columnPath: col.path, value }));
-          });
-        },
-        onCopyValue: (row: number, cell: number) => {
-          if (!currentData) return;
-          const col = currentData.columns[cell - 1];
-          if (!col) return;
-          const val = currentData.rows[row]?.[col.path];
-          const text = val === null || val === undefined ? "" : Array.isArray(val) ? val.join(", ") : String(val);
-          navigator.clipboard.writeText(text);
-        },
-        onDrilldown: (row: number, cell: number) => {
-          if (!currentData) return;
-          const col = currentData.columns[cell - 1];
-          if (!col || col.type !== "arrayOfObjects") return;
-          const newSegment = {
+          }),
+        );
+      },
+      onSetNull: (row: number, cell: number) => {
+        if (!currentData) return;
+        const col = currentData.columns[cell - 1];
+        if (!col) return;
+        postMessage(
+          withDrilldown({
+            type: "editCell" as const,
             rowIndex: row,
-            fieldPath: col.path,
-            label: `${getRowLabel(row)} > ${col.path}`,
-          };
-          postMessage({
-            type: "drilldown",
-            path: [...currentDrilldownPath, newSegment],
-          });
-        },
-        onAddRow: (afterIndex: number) => {
-          postMessage(withDrilldown({ type: "addRow" as const, afterIndex }));
-        },
-        onDeleteRows: (rowIndices: number[]) => {
-          postMessage(withDrilldown({ type: "deleteRows" as const, rowIndices }));
-        },
-        onDuplicateRows: (rowIndices: number[]) => {
-          postMessage(withDrilldown({ type: "duplicateRows" as const, rowIndices }));
-        },
-        onMoveRows: (rowIndices: number[], direction: "up" | "down") => {
-          postMessage(withDrilldown({ type: "moveRows" as const, rowIndices, direction }));
-        },
-        getSelectedRows: () => gridManager?.getSelectedRows() ?? [],
-        getTotalRowCount: () => currentData?.rows.length ?? 0,
-        getCellFromEvent: (e: Event) => {
-          return gridManager?.getCellFromEvent(e) ?? null;
-        },
-      }
-    );
+            columnPath: col.path,
+            value: null,
+          }),
+        );
+      },
+      onEditValue: (row: number, cell: number) => {
+        if (!currentData) return;
+        const col = currentData.columns[cell - 1];
+        if (!col) return;
+        const currentVal = currentData.rows[row]?.[col.path];
+        const text =
+          currentVal === null || currentVal === undefined
+            ? ""
+            : String(currentVal);
+        showEditDialog(text, (newValue) => {
+          let value: unknown = newValue;
+          if (col.type === "number" && newValue !== null) {
+            const num = Number(newValue);
+            if (!isNaN(num)) value = num;
+          } else if (col.type === "boolean" && newValue !== null) {
+            value = newValue === "true";
+          }
+          postMessage(
+            withDrilldown({
+              type: "editCell" as const,
+              rowIndex: row,
+              columnPath: col.path,
+              value,
+            }),
+          );
+        });
+      },
+      onCopyValue: (row: number, cell: number) => {
+        if (!currentData) return;
+        const col = currentData.columns[cell - 1];
+        if (!col) return;
+        const val = currentData.rows[row]?.[col.path];
+        const text =
+          val === null || val === undefined
+            ? ""
+            : Array.isArray(val)
+              ? val.join(", ")
+              : String(val);
+        navigator.clipboard.writeText(text);
+      },
+      onDrilldown: (row: number, cell: number) => {
+        if (!currentData) return;
+        const col = currentData.columns[cell - 1];
+        if (!col || col.type !== "arrayOfObjects") return;
+        const newSegment = {
+          rowIndex: row,
+          fieldPath: col.path,
+          label: `${getRowLabel(row)} > ${col.path}`,
+        };
+        postMessage({
+          type: "drilldown",
+          path: [...currentDrilldownPath, newSegment],
+        });
+      },
+      onAddRow: (afterIndex: number) => {
+        postMessage(withDrilldown({ type: "addRow" as const, afterIndex }));
+      },
+      onDeleteRows: (rowIndices: number[]) => {
+        postMessage(withDrilldown({ type: "deleteRows" as const, rowIndices }));
+      },
+      onDuplicateRows: (rowIndices: number[]) => {
+        postMessage(
+          withDrilldown({
+            type: "duplicateRows" as const,
+            rowIndices,
+          }),
+        );
+      },
+      onMoveRows: (rowIndices: number[], direction: "up" | "down") => {
+        postMessage(
+          withDrilldown({
+            type: "moveRows" as const,
+            rowIndices,
+            direction,
+          }),
+        );
+      },
+      getSelectedRows: () => gridManager?.getSelectedRows() ?? [],
+      getTotalRowCount: () => currentData?.rows.length ?? 0,
+      getCellFromEvent: (e: Event) => {
+        return gridManager?.getCellFromEvent(e) ?? null;
+      },
+    });
   };
 
   // Build and init grid
@@ -307,7 +381,14 @@ function initGrid(data: TableData) {
     data.rows,
     {
       onCellChange: (rowIndex: number, columnPath: string, value: unknown) => {
-        postMessage(withDrilldown({ type: "editCell" as const, rowIndex, columnPath, value }));
+        postMessage(
+          withDrilldown({
+            type: "editCell" as const,
+            rowIndex,
+            columnPath,
+            value,
+          }),
+        );
       },
       onCellClick: (rowIndex: number, cellIndex: number, _item: any) => {
         if (!currentData) return;
@@ -323,7 +404,7 @@ function initGrid(data: TableData) {
           path: [...currentDrilldownPath, newSegment],
         });
       },
-    }
+    },
   );
 
   initContextMenu();
@@ -343,7 +424,12 @@ function initGrid(data: TableData) {
       e.preventDefault();
       const sel = gridManager?.getSelectedRows() ?? [];
       if (sel.length > 0) {
-        postMessage(withDrilldown({ type: "duplicateRows" as const, rowIndices: sel }));
+        postMessage(
+          withDrilldown({
+            type: "duplicateRows" as const,
+            rowIndices: sel,
+          }),
+        );
       }
     }
 
@@ -355,7 +441,14 @@ function initGrid(data: TableData) {
         const col = currentData.columns[activeCell.cell - 1]; // -1 for row number column
         if (col) {
           e.preventDefault();
-          postMessage(withDrilldown({ type: "editCell" as const, rowIndex: activeCell.row, columnPath: col.path, value: undefined }));
+          postMessage(
+            withDrilldown({
+              type: "editCell" as const,
+              rowIndex: activeCell.row,
+              columnPath: col.path,
+              value: undefined,
+            }),
+          );
         }
       }
     }
@@ -365,7 +458,12 @@ function initGrid(data: TableData) {
       e.preventDefault();
       const sel = gridManager?.getSelectedRows() ?? [];
       if (sel.length > 0) {
-        postMessage(withDrilldown({ type: "deleteRows" as const, rowIndices: sel }));
+        postMessage(
+          withDrilldown({
+            type: "deleteRows" as const,
+            rowIndices: sel,
+          }),
+        );
       }
     }
 
@@ -374,7 +472,13 @@ function initGrid(data: TableData) {
       e.preventDefault();
       const sel = gridManager?.getSelectedRows() ?? [];
       if (sel.length > 0) {
-        postMessage(withDrilldown({ type: "moveRows" as const, rowIndices: sel, direction: "up" as const }));
+        postMessage(
+          withDrilldown({
+            type: "moveRows" as const,
+            rowIndices: sel,
+            direction: "up" as const,
+          }),
+        );
       }
     }
 
@@ -383,7 +487,13 @@ function initGrid(data: TableData) {
       e.preventDefault();
       const sel = gridManager?.getSelectedRows() ?? [];
       if (sel.length > 0) {
-        postMessage(withDrilldown({ type: "moveRows" as const, rowIndices: sel, direction: "down" as const }));
+        postMessage(
+          withDrilldown({
+            type: "moveRows" as const,
+            rowIndices: sel,
+            direction: "down" as const,
+          }),
+        );
       }
     }
 
@@ -391,7 +501,10 @@ function initGrid(data: TableData) {
     if (e.altKey && e.key === "ArrowLeft" && !e.ctrlKey && !e.shiftKey) {
       if (currentDrilldownPath.length > 0) {
         e.preventDefault();
-        postMessage({ type: "drilldownBack", level: currentDrilldownPath.length - 1 });
+        postMessage({
+          type: "drilldownBack",
+          level: currentDrilldownPath.length - 1,
+        });
       }
     }
 
@@ -399,15 +512,18 @@ function initGrid(data: TableData) {
     if (e.key === "Backspace" && !e.ctrlKey && !e.shiftKey && !e.altKey) {
       // Only navigate if not editing a cell
       const activeEl = document.activeElement;
-      const isEditing = activeEl && (
-        activeEl.tagName === "INPUT" ||
-        activeEl.tagName === "TEXTAREA" ||
-        activeEl.tagName === "SELECT" ||
-        (activeEl as HTMLElement).isContentEditable
-      );
+      const isEditing =
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.tagName === "SELECT" ||
+          (activeEl as HTMLElement).isContentEditable);
       if (!isEditing && currentDrilldownPath.length > 0) {
         e.preventDefault();
-        postMessage({ type: "drilldownBack", level: currentDrilldownPath.length - 1 });
+        postMessage({
+          type: "drilldownBack",
+          level: currentDrilldownPath.length - 1,
+        });
       }
     }
 
@@ -444,7 +560,10 @@ function initGrid(data: TableData) {
   });
 }
 
-function showEditDialog(currentValue: string, onSave: (value: string | null) => void) {
+function showEditDialog(
+  currentValue: string,
+  onSave: (value: string | null) => void,
+) {
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
   overlay.style.inset = "0";
@@ -505,7 +624,8 @@ function showEditDialog(currentValue: string, onSave: (value: string | null) => 
   const cancelBtn = document.createElement("button");
   cancelBtn.textContent = "Cancel";
   btnStyle(cancelBtn);
-  cancelBtn.style.background = "var(--vscode-button-secondaryBackground, #3a3d41)";
+  cancelBtn.style.background =
+    "var(--vscode-button-secondaryBackground, #3a3d41)";
   cancelBtn.style.color = "var(--vscode-button-secondaryForeground, #cccccc)";
   buttons.appendChild(cancelBtn);
 
